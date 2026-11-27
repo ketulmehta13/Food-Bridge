@@ -51,17 +51,23 @@ export const assertTransition = (from, to) => {
  *                                     as 404, so only put "is this yours / can you see it"
  *                                     rules here.
  * @param {object} [args.set]          extra fields to $set with the status (e.g. claimedBy)
+ * @param {string[]} [args.unset]      fields to $unset (e.g. ['claimedBy', 'pickupOtpHash']).
+ *                                     Cannot include _id or status, or a key also in `set`.
+ * @param {'after'|'before'} [args.returnDocument='after'] return the document as it was
+ *                                     before the change (e.g. to read the previous status
+ *                                     and claimedBy) or after it
  * @param {import('mongoose').ClientSession} [args.session] optional transaction session
- * @returns {Promise<import('mongoose').Document>} the updated donation
+ * @returns {Promise<import('mongoose').Document>} the donation after (default) or before the change
  * @throws {ApiError} 409 illegal transition or wrong current status;
  *                    404 not found or does not match extraFilter (e.g. not yours)
  *
  * @example
- * // Donor cancels their own donation:
- * await transitionDonation({
+ * // Donor cancels their own donation, reading what it was before:
+ * const before = await transitionDonation({
  *   donationId, from: [DONATION_STATUS.AVAILABLE, DONATION_STATUS.CLAIMED],
  *   to: DONATION_STATUS.CANCELLED, extraFilter: { donor: donorId },
  *   set: { cancelReason: reason, cancelledAt: new Date() },
+ *   unset: ['pickupOtpHash', 'otpGeneratedAt'], returnDocument: 'before',
  * });
  *
  * @example
@@ -70,6 +76,14 @@ export const assertTransition = (from, to) => {
  *   donationId, from: [DONATION_STATUS.AVAILABLE], to: DONATION_STATUS.CLAIMED,
  *   set: { claimedBy: ngoId, claimedAt: new Date() },
  * });
+ *
+ * @example
+ * // NGO unclaims (only the current claimer can):
+ * await transitionDonation({
+ *   donationId, from: [DONATION_STATUS.CLAIMED], to: DONATION_STATUS.AVAILABLE,
+ *   extraFilter: { claimedBy: ngoId }, set: { otpAttempts: 0 },
+ *   unset: ['claimedBy', 'claimedAt', 'pickupOtpHash', 'otpGeneratedAt'],
+ * });
  */
 export const transitionDonation = async ({
   donationId,
@@ -77,10 +91,20 @@ export const transitionDonation = async ({
   to,
   extraFilter = {},
   set = {},
+  unset = [],
+  returnDocument = 'after',
   session,
 }) => {
   if (!Array.isArray(from) || from.length === 0) {
     throw new Error('transitionDonation: "from" must be a non-empty array');
+  }
+  if (returnDocument !== 'after' && returnDocument !== 'before') {
+    throw new Error('transitionDonation: "returnDocument" must be "after" or "before"');
+  }
+  for (const field of unset) {
+    if (field === '_id' || field === 'status' || field in set) {
+      throw new Error(`transitionDonation: cannot unset "${field}"`);
+    }
   }
   for (const status of from) assertTransition(status, to);
 
@@ -88,11 +112,14 @@ export const transitionDonation = async ({
 
   // _id and status come last so extraFilter can never override them.
   const filter = { ...extraFilter, _id: donationId, status: { $in: from } };
-  const updated = await Donation.findOneAndUpdate(
-    filter,
-    { $set: { ...set, status: to } },
-    { returnDocument: 'after', runValidators: true, session }
-  );
+  const update = { $set: { ...set, status: to } };
+  if (unset.length) update.$unset = Object.fromEntries(unset.map((field) => [field, 1]));
+
+  const updated = await Donation.findOneAndUpdate(filter, update, {
+    returnDocument,
+    runValidators: true,
+    session,
+  });
   if (updated) return updated;
 
   // Work out why: missing / not yours (404) vs. wrong current state (409).

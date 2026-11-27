@@ -1,5 +1,6 @@
 import { Link } from 'react-router-dom';
 import DevTokenPanel from '../components/DevTokenPanel.jsx';
+import RawRequestPanel from '../components/RawRequestPanel.jsx';
 
 // Donor landing page (/donor): links to the donor test pages + the dev token panel.
 const LINKS = [
@@ -20,6 +21,7 @@ export default function DonorDashboard() {
         ))}
       </div>
       <DevTokenPanel />
+      <RawRequestPanel presets={[{ label: 'GET my donations', method: 'GET', path: '/donor/donations' }]} />
     </main>
   );
 }

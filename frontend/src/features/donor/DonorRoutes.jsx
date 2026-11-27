@@ -3,6 +3,7 @@ import DonorDashboard from './pages/DonorDashboard.jsx';
 import CreateDonationPage from './pages/CreateDonationPage.jsx';
 import MyDonationsPage from './pages/MyDonationsPage.jsx';
 import DonationDetailPage from './pages/DonationDetailPage.jsx';
+import EditDonationPage from './pages/EditDonationPage.jsx';
 // import ProtectedRoute from '../../components/shared/ProtectedRoute.jsx';
 // import { USER_TYPES } from '../../constants/index.js';
 
@@ -15,6 +16,7 @@ export default function DonorRoutes() {
       <Route path="donations" element={<MyDonationsPage />} />
       <Route path="donations/new" element={<CreateDonationPage />} />
       <Route path="donations/:id" element={<DonationDetailPage />} />
+      <Route path="donations/:id/edit" element={<EditDonationPage />} />
     </Routes>
   );
 

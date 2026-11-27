@@ -3,7 +3,10 @@ import { Link, useParams } from 'react-router-dom';
 import { getMyDonation, describeError } from '../api/donor.api.js';
 import ApiResult from '../components/ApiResult.jsx';
 import DevTokenNotice from '../components/DevTokenNotice.jsx';
+import CancelDonationBox from '../components/CancelDonationBox.jsx';
+import RawRequestPanel from '../components/RawRequestPanel.jsx';
 import StatusBadge from '../../../components/shared/StatusBadge.jsx';
+import { DONATION_STATUS } from '../../../constants/index.js';
 import { SAFETY_CHECKS } from '../donor.constants.js';
 import { formatDateTime } from '../utils/datetime.js';
 
@@ -21,6 +24,7 @@ export default function DonationDetailPage() {
   const [loading, setLoading] = useState(true);
   const [data, setData] = useState(undefined);
   const [error, setError] = useState(null);
+  const [reloadKey, setReloadKey] = useState(0);
 
   useEffect(() => {
     let active = true;
@@ -33,10 +37,12 @@ export default function DonationDetailPage() {
     return () => {
       active = false;
     };
-  }, [id]);
+  }, [id, reloadKey]);
 
   const d = data?.data?.donation;
   const history = data?.data?.history ?? [];
+  const canEdit = d?.status === DONATION_STATUS.AVAILABLE;
+  const canCancel = canEdit || d?.status === DONATION_STATUS.CLAIMED;
 
   return (
     <main className="mx-auto max-w-4xl px-4 py-8">
@@ -48,6 +54,11 @@ export default function DonationDetailPage() {
           <div className="mt-2 flex items-center gap-3">
             <h1 className="text-2xl font-bold">Donation</h1>
             <StatusBadge status={d.status} />
+            {canEdit && (
+              <Link to={`/donor/donations/${d._id}/edit`} className="ml-auto rounded bg-blue-700 px-3 py-1.5 text-sm text-white">
+                Edit
+              </Link>
+            )}
           </div>
           <p className="font-mono text-xs text-gray-500">{d._id}</p>
 
@@ -89,8 +100,17 @@ export default function DonationDetailPage() {
             <Row label="Notes">{d.notes}</Row>
             <Row label="Photos">{d.photos?.length ? `${d.photos.length} photo(s)` : null}</Row>
             {d.cancelReason && <Row label="Cancel reason">{d.cancelReason}</Row>}
+            {d.cancelledAt && <Row label="Cancelled at">{formatDateTime(d.cancelledAt)}</Row>}
             <Row label="Posted">{formatDateTime(d.createdAt)}</Row>
           </dl>
+
+          {canCancel && (
+            <CancelDonationBox
+              donationId={d._id}
+              status={d.status}
+              onCancelled={() => setReloadKey((k) => k + 1)}
+            />
+          )}
 
           <section className="mt-4 rounded-lg border border-gray-200 bg-white p-4 text-sm">
             <h2 className="font-semibold">History</h2>
@@ -112,6 +132,15 @@ export default function DonationDetailPage() {
       )}
 
       <ApiResult loading={loading} error={error} data={data} />
+
+      <RawRequestPanel
+        presets={[
+          { label: 'GET detail', method: 'GET', path: `/donor/donations/${id}` },
+          { label: 'PATCH edit', method: 'PATCH', path: `/donor/donations/${id}`, body: { totalServings: 10 } },
+          { label: 'PATCH cancel', method: 'PATCH', path: `/donor/donations/${id}/cancel`, body: { reason: 'Event cancelled' } },
+          { label: 'PATCH cancel (no reason)', method: 'PATCH', path: `/donor/donations/${id}/cancel`, body: {} },
+        ]}
+      />
     </main>
   );
 }

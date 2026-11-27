@@ -76,6 +76,24 @@ export const createDonationBody = z.strictObject({
   notes: optionalText(500),
 });
 
+/**
+ * Body of PATCH /api/donor/donations/:id. Derived from the create schema: every editable
+ * field is optional, still strict. Nested objects (pickupWindow, address, location) and
+ * the items array must be sent whole. safetyChecklist cannot be edited.
+ * "notes": "" or "allergenInfo": "" clears that field (the key stays, the value is undefined).
+ */
+export const updateDonationBody = createDonationBody
+  .omit({ safetyChecklist: true })
+  .partial()
+  .refine((body) => Object.keys(body).length > 0, {
+    error: 'Send at least one field to change',
+  });
+
+/** Body of PATCH /api/donor/donations/:id/cancel. A reason is required only for CLAIMED food. */
+export const cancelDonationBody = z.strictObject({
+  reason: trimmedString(300, { min: 5 }).optional(),
+});
+
 /** Sort options for "my donations". The leading "-" means newest/latest first. */
 export const MY_DONATIONS_SORTS = Object.freeze([
   'createdAt',

@@ -55,17 +55,28 @@ export const donorApi = {
 export const createDonation = (body) => donorApi.post('/donor/donations', body);
 
 /**
- * POST /api/donor/donations with raw text sent exactly as typed (for testing attack
- * payloads and malformed JSON). Content-Type is still application/json.
+ * Send any request with the body text exactly as typed (for testing attack payloads and
+ * malformed JSON). Content-Type is application/json whenever a body is sent.
+ * @param {{ method: string, url: string, text?: string }} args url is relative to /api
  */
-export const createDonationRaw = (text) =>
+export const sendRaw = ({ method, url, text }) =>
   request({
-    method: 'post',
-    url: '/donor/donations',
-    data: text,
-    headers: { 'Content-Type': 'application/json' },
-    transformRequest: [(data) => data],
+    method: method.toLowerCase(),
+    url,
+    ...(text !== undefined && text !== '' && {
+      data: text,
+      headers: { 'Content-Type': 'application/json' },
+      transformRequest: [(data) => data],
+    }),
   });
+
+/** PATCH /api/donor/donations/:id with only the changed fields. */
+export const updateDonation = (id, changes) =>
+  donorApi.patch(`/donor/donations/${encodeURIComponent(id)}`, changes);
+
+/** PATCH /api/donor/donations/:id/cancel. body: { reason? } */
+export const cancelDonation = (id, body = {}) =>
+  donorApi.patch(`/donor/donations/${encodeURIComponent(id)}/cancel`, body);
 
 /** GET /api/donor/donations. params: { page, limit, status, sort } (empty values dropped). */
 export const listMyDonations = (params = {}) =>

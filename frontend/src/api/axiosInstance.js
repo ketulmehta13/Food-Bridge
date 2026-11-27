@@ -4,6 +4,9 @@ import axios from 'axios';
 const api = axios.create({
   baseURL: import.meta.env.VITE_API_URL || 'http://localhost:5000/api',
   withCredentials: true,
+  // The backend's CSRF guard rejects POST/PATCH/DELETE without this header
+  // (another website's form can't add it), so send it on every request.
+  headers: { 'X-Requested-With': 'XMLHttpRequest' },
 });
 
 // A 401 from these means "wrong password" / "no session", not "access token expired",

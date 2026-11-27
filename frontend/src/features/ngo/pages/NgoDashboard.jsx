@@ -1,57 +1,32 @@
-import { useNavigate } from 'react-router-dom';
+import { Link } from 'react-router-dom';
 import { useAuth } from '../../auth/AuthContext.jsx';
-import Button from '../../../components/ui/Button.jsx';
-import { VERIFICATION_STATUS } from '../../../constants/index.js';
+import VerificationBanner from '../components/VerificationBanner.jsx';
 
-// Banner text per verification status.
-const STATUS_BANNER = {
-  [VERIFICATION_STATUS.PENDING]: {
-    className: 'border-amber-200 bg-amber-50 text-amber-800',
-    text: 'Your NGO is awaiting admin verification. You can look around, but you can claim food only after you are verified.',
-  },
-  [VERIFICATION_STATUS.REJECTED]: {
-    className: 'border-red-200 bg-red-50 text-red-800',
-    text: 'Your verification was rejected.',
-  },
-  [VERIFICATION_STATUS.VERIFIED]: {
-    className: 'border-green-200 bg-green-50 text-green-800',
-    text: 'Your NGO is verified. You can claim food donations.',
-  },
-};
-
-// NGO landing page (/ngo). Placeholder until the NGO features are built.
+// NGO landing page (/ngo). Placeholder until browse/claim features are built.
 export default function NgoDashboard() {
-  const { user, logout } = useAuth();
-  const navigate = useNavigate();
-  const banner = STATUS_BANNER[user.verificationStatus];
-
-  const onLogout = async () => {
-    await logout();
-    navigate('/login', { replace: true });
-  };
+  const { user } = useAuth();
 
   return (
-    <main className="mx-auto max-w-5xl px-4 py-10">
-      <div className="flex flex-wrap items-start justify-between gap-4">
-        <div>
-          <h1 className="text-2xl font-bold text-brand-dark">{user.ngoProfile?.orgName}</h1>
-          <p className="mt-1 text-gray-600">Welcome, {user.name}</p>
-        </div>
-        <Button variant="secondary" onClick={onLogout}>
-          Log out
-        </Button>
+    <main className="mx-auto max-w-5xl px-4 py-8">
+      <h1 className="text-2xl font-bold text-brand-dark">{user.ngoProfile?.orgName}</h1>
+      <p className="mt-1 text-gray-600">Welcome, {user.name}</p>
+
+      <VerificationBanner user={user} className="mt-6" />
+
+      <div className="mt-6 rounded-lg border border-gray-200 bg-white p-5">
+        <h2 className="font-semibold text-gray-900">Your organisation profile</h2>
+        <p className="mt-1 text-sm text-gray-600">
+          Keep your contact details, location and service radius up to date so donors can reach you.
+        </p>
+        <Link
+          to="/ngo/profile"
+          className="mt-3 inline-block text-sm font-semibold text-brand-dark hover:underline"
+        >
+          View / edit profile →
+        </Link>
       </div>
 
-      {banner && (
-        <div className={`mt-6 rounded-md border px-4 py-3 text-sm ${banner.className}`}>
-          {banner.text}
-          {user.verificationStatus === VERIFICATION_STATUS.REJECTED && user.rejectionReason && (
-            <> Reason: {user.rejectionReason}</>
-          )}
-        </div>
-      )}
-
-      <p className="mt-8 text-gray-500">NGO features (browse donations, claims) will appear here.</p>
+      <p className="mt-8 text-gray-500">Browse donations and your claims will appear here.</p>
     </main>
   );
 }

@@ -1,5 +1,7 @@
 import { Routes, Route } from 'react-router-dom';
+import NgoLayout from './components/NgoLayout.jsx';
 import NgoDashboard from './pages/NgoDashboard.jsx';
+import NgoProfile from './pages/NgoProfile.jsx';
 import ProtectedRoute from '../../components/shared/ProtectedRoute.jsx';
 import { USER_TYPES } from '../../constants/index.js';
 
@@ -10,9 +12,13 @@ export default function NgoRoutes() {
     // Only logged-in NGO accounts can open any /ngo page.
     <ProtectedRoute userTypes={[USER_TYPES.NGO]}>
       <Routes>
-        <Route index element={<NgoDashboard />} />
-        {/* <Route path="donations" element={<BrowseDonations />} /> */}
-        {/* <Route path="claims" element={<MyClaims />} /> */}
+        {/* NgoLayout draws the top bar; the matching page renders inside it. */}
+        <Route element={<NgoLayout />}>
+          <Route index element={<NgoDashboard />} />
+          <Route path="profile" element={<NgoProfile />} />
+          {/* <Route path="donations" element={<BrowseDonations />} /> */}
+          {/* <Route path="claims" element={<MyClaims />} /> */}
+        </Route>
       </Routes>
     </ProtectedRoute>
   );

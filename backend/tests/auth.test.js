@@ -1,16 +1,13 @@
 // Auth API tests: register, login, /users/me, refresh, logout. Run with: npm test
-// Starts the real Express app on a random port, using the foodbridge_test database.
+// Starts the real Express app on a random port, using an in-memory MongoDB
+// (no local MongoDB needed).
+import './helpers/env.js'; // must be first: sets NODE_ENV=test + JWT secrets
 import { describe, it, before, after } from 'node:test';
 import assert from 'node:assert/strict';
 
-// Must be set BEFORE the app is imported (disables morgan logs + rate limits).
-process.env.NODE_ENV = 'test';
-process.env.JWT_ACCESS_SECRET ||= 'test-access-secret';
-process.env.JWT_REFRESH_SECRET ||= 'test-refresh-secret';
-
-const { default: mongoose } = await import('mongoose');
-const { default: app } = await import('../src/app.js');
-const { User } = await import('../src/models/User.js');
+import { startDb, stopDb } from './helpers/db.js';
+import app from '../src/app.js';
+import { User } from '../src/models/User.js';
 
 let server;
 let baseUrl;
@@ -57,17 +54,14 @@ const donorBody = (overrides = {}) => ({
 });
 
 before(async () => {
-  await mongoose.connect('mongodb://127.0.0.1:27017/foodbridge_test');
-  await mongoose.connection.dropDatabase();
-  await User.syncIndexes();
+  await startDb();
   server = app.listen(0);
   baseUrl = `http://127.0.0.1:${server.address().port}/api`;
 });
 
 after(async () => {
   server.close();
-  await mongoose.connection.dropDatabase();
-  await mongoose.disconnect();
+  await stopDb();
 });
 
 describe('POST /auth/register', () => {

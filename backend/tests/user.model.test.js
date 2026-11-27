@@ -1,11 +1,10 @@
 // User model tests. Run with: npm test
-// Uses a separate database (foodbridge_test) that is wiped before and after.
+// Uses an in-memory MongoDB (no local MongoDB needed).
+import './helpers/env.js';
 import { describe, it, before, after } from 'node:test';
 import assert from 'node:assert/strict';
-import mongoose from 'mongoose';
+import { startDb, stopDb } from './helpers/db.js';
 import { User } from '../src/models/User.js';
-
-const TEST_DB = 'mongodb://127.0.0.1:27017/foodbridge_test';
 
 const ngoData = (overrides = {}) => ({
   name: 'Asha',
@@ -37,16 +36,8 @@ const expectValidationError = async (data, field) => {
 // Read the document exactly as stored in MongoDB (bypassing Mongoose).
 const raw = (id) => User.collection.findOne({ _id: id });
 
-before(async () => {
-  await mongoose.connect(TEST_DB);
-  await mongoose.connection.dropDatabase();
-  await User.syncIndexes();
-});
-
-after(async () => {
-  await mongoose.connection.dropDatabase();
-  await mongoose.disconnect();
-});
+before(startDb);
+after(stopDb);
 
 describe('User model - NGO', () => {
   let ngo;

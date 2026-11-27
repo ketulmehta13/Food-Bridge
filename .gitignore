@@ -16,3 +16,7 @@ logs/
 # Editor / OS
 .vscode/
 .DS_Store
+
+# Postman local-workspace files (created when Postman is linked to this folder)
+postman/
+.postman/

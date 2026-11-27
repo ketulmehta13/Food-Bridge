@@ -10,6 +10,21 @@ export const USER_TYPES = Object.freeze({
   NGO: 'NGO',
 });
 
+export const DONOR_CATEGORIES = Object.freeze({
+  RESTAURANT: 'RESTAURANT',
+  HOTEL: 'HOTEL',
+  CATERER: 'CATERER',
+  EVENT: 'EVENT',
+  HOUSEHOLD: 'HOUSEHOLD',
+  OTHER: 'OTHER',
+});
+
+export const VERIFICATION_STATUS = Object.freeze({
+  PENDING: 'PENDING',
+  VERIFIED: 'VERIFIED',
+  REJECTED: 'REJECTED',
+});
+
 export const DONATION_STATUS = Object.freeze({
   AVAILABLE: 'AVAILABLE',
   CLAIMED: 'CLAIMED',

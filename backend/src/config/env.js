@@ -15,6 +15,10 @@ export const env = Object.freeze({
 
   CLIENT_URL: process.env.CLIENT_URL || 'http://localhost:5173',
 
+  // How many proxies sit in front of the app in production, so req.ip is the visitor's
+  // real IP (used by rate limits). Render alone = 1; Vercel -> Render = 2.
+  TRUST_PROXY: Number(process.env.TRUST_PROXY) || 1,
+
   CLOUDINARY_CLOUD_NAME: process.env.CLOUDINARY_CLOUD_NAME || '',
   CLOUDINARY_API_KEY: process.env.CLOUDINARY_API_KEY || '',
   CLOUDINARY_API_SECRET: process.env.CLOUDINARY_API_SECRET || '',

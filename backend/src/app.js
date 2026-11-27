@@ -11,8 +11,9 @@ import { notFound, errorHandler } from './middlewares/error.middleware.js';
 
 const app = express();
 
-// Needed for correct client IPs (rate limiting, secure cookies) behind a proxy (Render, etc.).
-if (env.IS_PROD) app.set('trust proxy', 1);
+// Needed for correct client IPs (rate limiting, secure cookies) behind proxies.
+// In production: browser -> Vercel (forwards /api) -> Render -> app, so set TRUST_PROXY=2.
+if (env.IS_PROD) app.set('trust proxy', env.TRUST_PROXY);
 
 // Security + parsing
 app.use(helmet());

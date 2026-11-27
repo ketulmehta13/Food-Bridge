@@ -1,6 +1,8 @@
 import { Router } from 'express';
 import mongoose from 'mongoose';
 import { ApiResponse } from '../utils/ApiResponse.js';
+import ngoRoutes from './ngo.routes.js';
+import donorRoutes from './donor.routes.js';
 
 const router = Router();
 
@@ -20,15 +22,14 @@ router.get('/health', (req, res) => {
   );
 });
 
-// Feature routes are mounted here as they are built, e.g.:
-// import authRoutes from './auth.routes.js';
-// import userRoutes from './user.routes.js';
-// import donationRoutes from './donation.routes.js';
-// import adminRoutes from './admin.routes.js';
-//
-// router.use('/auth', authRoutes);           // -> /api/auth/*
-// router.use('/users', userRoutes);          // -> /api/users/*
-// router.use('/donations', donationRoutes);  // -> /api/donations/*
-// router.use('/admin', adminRoutes);         // -> /api/admin/*
+// Feature routers. Add new endpoints inside each feature's own routes file,
+// not here, so this file rarely changes (avoids merge conflicts).
+router.use('/ngo', ngoRoutes); //     -> /api/ngo/*    (Ketul)
+router.use('/donor', donorRoutes); // -> /api/donor/*  (Jay)
+
+// Still to be mounted when built:
+// router.use('/auth', authRoutes);   // -> /api/auth/*   (Ketul)
+// router.use('/users', userRoutes);  // -> /api/users/*  (Ketul)
+// router.use('/admin', adminRoutes); // -> /api/admin/*
 
 export default router;

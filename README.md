@@ -80,6 +80,29 @@ npm run dev               # http://localhost:5173
 
 Workflow: pull the latest `main` into your branch, build your feature, push, and open a PR into `main`.
 
+## Team conventions (avoiding merge conflicts)
+
+Each feature lives in its own files. Add code inside **your** feature's files only:
+
+| Feature | Owner | Backend | Frontend |
+| ------- | ----- | ------- | -------- |
+| NGO     | Ketul | `routes/ngo.routes.js` → `/api/ngo/*`, `ngo.*` controllers/services/validators | `features/ngo/` (pages go in `NgoRoutes.jsx`) → `/ngo/*` |
+| Donor   | Jay   | `routes/donor.routes.js` → `/api/donor/*`, `donor.*` controllers/services/validators | `features/donor/` (pages go in `DonorRoutes.jsx`) → `/donor/*` |
+
+Shared files have a single owner. Ask them (or open a small separate PR) before changing:
+
+| Shared file(s) | Owner |
+| -------------- | ----- |
+| `models/User.js`, auth (`/api/auth`, `/api/users`), Login/Register pages | Ketul |
+| `models/Donation.js` | Jay |
+| `routes/index.js`, `App.jsx`, `constants/`, `components/ui/`, `layouts/`, `index.css` | Agree first, merge early |
+
+Rules of thumb:
+
+- `git pull origin main` into your branch at the start of every session.
+- Small PRs, merged one at a time; pull `main` again before opening the next one.
+- Tell each other before `npm install`-ing a new package. On a `package-lock.json` conflict, take `main`'s version and re-run `npm install`.
+
 ## Commit style
 
 Use [Conventional Commit](https://www.conventionalcommits.org/) prefixes:

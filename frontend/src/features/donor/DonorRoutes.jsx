@@ -1,5 +1,8 @@
 import { Routes, Route } from 'react-router-dom';
 import DonorDashboard from './pages/DonorDashboard.jsx';
+import CreateDonationPage from './pages/CreateDonationPage.jsx';
+import MyDonationsPage from './pages/MyDonationsPage.jsx';
+import DonationDetailPage from './pages/DonationDetailPage.jsx';
 // import ProtectedRoute from '../../components/shared/ProtectedRoute.jsx';
 // import { USER_TYPES } from '../../constants/index.js';
 
@@ -9,8 +12,9 @@ export default function DonorRoutes() {
   const routes = (
     <Routes>
       <Route index element={<DonorDashboard />} />
-      {/* <Route path="donations/new" element={<CreateDonation />} /> */}
-      {/* <Route path="donations" element={<MyDonations />} /> */}
+      <Route path="donations" element={<MyDonationsPage />} />
+      <Route path="donations/new" element={<CreateDonationPage />} />
+      <Route path="donations/:id" element={<DonationDetailPage />} />
     </Routes>
   );
 

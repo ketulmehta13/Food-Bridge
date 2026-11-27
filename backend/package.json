@@ -7,8 +7,9 @@
   "scripts": {
     "dev": "nodemon server.js",
     "start": "node server.js",
-    "test": "node --test --test-concurrency=1 tests/",
-    "seed": "node scripts/seed.js"
+    "test": "node tests/run.js",
+    "seed": "node scripts/seed.js",
+    "dev:users": "node scripts/devUsers.js"
   },
   "engines": {
     "node": ">=20"
@@ -27,6 +28,8 @@
     "zod": "^4.6.7"
   },
   "devDependencies": {
-    "nodemon": "^3.1.14"
+    "mongodb-memory-server": "^11.4.0",
+    "nodemon": "^3.1.14",
+    "supertest": "^7.3.2"
   }
 }

@@ -6,6 +6,7 @@ import FormAlert from '../components/FormAlert.jsx';
 import Input from '../../../components/ui/Input.jsx';
 import Select from '../../../components/ui/Select.jsx';
 import Button from '../../../components/ui/Button.jsx';
+import LocationField from '../../../components/shared/LocationField.jsx';
 import { USER_TYPES, DONOR_CATEGORIES } from '../../../constants/index.js';
 import { getErrorMessage, getFieldErrors } from '../../../utils/apiError.js';
 
@@ -74,7 +75,6 @@ export default function Register() {
 
   const [form, setForm] = useState(EMPTY_FORM);
   const [submitting, setSubmitting] = useState(false);
-  const [locating, setLocating] = useState(false);
   const [error, setError] = useState('');
   const [fieldErrors, setFieldErrors] = useState({});
 
@@ -84,30 +84,6 @@ export default function Register() {
   const onChange = (e) => setForm((f) => ({ ...f, [e.target.name]: e.target.value }));
   const fe = (field) => fieldErrors[field];
   const locationError = fe('location') || fe('location.lat') || fe('location.lng');
-
-  // Fill lat/lng from the browser (asks the user for permission).
-  const useMyLocation = () => {
-    if (!navigator.geolocation) {
-      setError('Your browser does not support location. Please enter it manually.');
-      return;
-    }
-    setLocating(true);
-    navigator.geolocation.getCurrentPosition(
-      ({ coords }) => {
-        setForm((f) => ({
-          ...f,
-          lat: coords.latitude.toFixed(6),
-          lng: coords.longitude.toFixed(6),
-        }));
-        setLocating(false);
-      },
-      () => {
-        setError('Could not get your location. Please allow access or enter it manually.');
-        setLocating(false);
-      },
-      { enableHighAccuracy: true, timeout: 10000 }
-    );
-  };
 
   const onSubmit = async (e) => {
     e.preventDefault();
@@ -248,22 +224,12 @@ export default function Register() {
               />
             </div>
 
-            <div>
-              <div className="mb-1 flex items-center justify-between">
-                <span className="text-sm font-medium text-gray-700">
-                  Location <span className="text-red-500">*</span>
-                </span>
-                <Button variant="secondary" onClick={useMyLocation} loading={locating} className="px-3 py-1 text-xs">
-                  Use my current location
-                </Button>
-              </div>
-              <p className="mb-2 text-xs text-gray-500">Used to show you food donations nearby.</p>
-              <div className="grid grid-cols-2 gap-4">
-                <Input placeholder="Latitude" name="lat" inputMode="decimal" value={form.lat} onChange={onChange} />
-                <Input placeholder="Longitude" name="lng" inputMode="decimal" value={form.lng} onChange={onChange} />
-              </div>
-              {locationError && <p className="mt-1 text-xs text-red-600">{locationError}</p>}
-            </div>
+            <LocationField
+              required
+              value={{ lat: form.lat, lng: form.lng }}
+              onChange={({ lat, lng }) => setForm((f) => ({ ...f, lat, lng }))}
+              error={locationError}
+            />
           </section>
         ) : (
           <section className="space-y-4">

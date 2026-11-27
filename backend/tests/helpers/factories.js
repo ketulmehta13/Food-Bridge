@@ -50,7 +50,7 @@ export const donationData = (donorId, overrides = {}) => {
   const now = Date.now();
   return {
     donor: donorId,
-    items: [{ name: 'Veg biryani', quantity: 5, unit: 'kg' }],
+    items: [{ name: 'Veg biryani', quantity: 5, unit: 'KG' }],
     totalServings: 25,
     estimatedWeightKg: 5,
     foodType: FOOD_TYPES.VEG,
@@ -67,6 +67,39 @@ export const donationData = (donorId, overrides = {}) => {
       packedAndCovered: true,
       notSpoiled: true,
     },
+    ...overrides,
+  };
+};
+
+/**
+ * A valid POST /api/donor/donations body (JSON-ready, ISO times relative to now).
+ * Times: prepared 30 min ago, pickup now+1h..now+3h, best-before now+5h.
+ */
+export const donationBody = (overrides = {}) => {
+  const now = Date.now();
+  const iso = (offsetMin) => new Date(now + offsetMin * MIN).toISOString();
+  return {
+    items: [
+      { name: 'Veg biryani', quantity: 5, unit: 'KG' },
+      { name: 'Rotis', quantity: 40, unit: 'PIECES' },
+    ],
+    totalServings: 30,
+    estimatedWeightKg: 7.5,
+    foodType: FOOD_TYPES.VEG,
+    category: FOOD_CATEGORIES.COOKED,
+    preparedAt: iso(-30),
+    bestBefore: iso(5 * 60),
+    pickupWindow: { start: iso(60), end: iso(3 * 60) },
+    location: { lat: 23.0225, lng: 72.5714 },
+    address: { line1: '12 CG Road, Navrangpura', city: 'Ahmedabad', state: 'Gujarat', pincode: '380009' },
+    safetyChecklist: {
+      preparedHygienically: true,
+      storedAtSafeTemperature: true,
+      packedAndCovered: true,
+      notSpoiled: true,
+    },
+    allergenInfo: 'Contains nuts',
+    notes: 'Please bring containers',
     ...overrides,
   };
 };

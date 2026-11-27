@@ -57,7 +57,7 @@ const donationSchema = new mongoose.Schema(
       type: Number,
       required: true,
       min: [0.01, 'Weight must be positive'],
-      max: 1000,
+      max: 2000,
     },
     foodType: { type: String, enum: Object.values(FOOD_TYPES), required: true },
     category: { type: String, enum: Object.values(FOOD_CATEGORIES), required: true },

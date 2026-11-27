@@ -49,6 +49,34 @@ export const donorApi = {
   delete: (url) => request({ method: 'delete', url }),
 };
 
+// ---- Donations ----
+
+/** POST /api/donor/donations with a body object. */
+export const createDonation = (body) => donorApi.post('/donor/donations', body);
+
+/**
+ * POST /api/donor/donations with raw text sent exactly as typed (for testing attack
+ * payloads and malformed JSON). Content-Type is still application/json.
+ */
+export const createDonationRaw = (text) =>
+  request({
+    method: 'post',
+    url: '/donor/donations',
+    data: text,
+    headers: { 'Content-Type': 'application/json' },
+    transformRequest: [(data) => data],
+  });
+
+/** GET /api/donor/donations. params: { page, limit, status, sort } (empty values dropped). */
+export const listMyDonations = (params = {}) =>
+  donorApi.get(
+    '/donor/donations',
+    Object.fromEntries(Object.entries(params).filter(([, v]) => v !== '' && v != null))
+  );
+
+/** GET /api/donor/donations/:id */
+export const getMyDonation = (id) => donorApi.get(`/donor/donations/${encodeURIComponent(id)}`);
+
 /** Turn an axios error into a readable message plus the server's JSON body (if any). */
 export const describeError = (err) => ({
   message: err.response?.data?.message || err.message || 'Request failed',

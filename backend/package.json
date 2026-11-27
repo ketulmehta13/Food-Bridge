@@ -8,6 +8,7 @@
     "dev": "nodemon server.js",
     "start": "node server.js",
     "test": "node tests/run.js",
+    "seed": "node scripts/seed.js",
     "dev:users": "node scripts/devUsers.js"
   },
   "engines": {

@@ -1,6 +1,8 @@
 import { Router } from 'express';
 import mongoose from 'mongoose';
 import { ApiResponse } from '../utils/ApiResponse.js';
+import authRoutes from './auth.routes.js';
+import userRoutes from './user.routes.js';
 import ngoRoutes from './ngo.routes.js';
 import donorRoutes from './donor.routes.js';
 
@@ -24,12 +26,12 @@ router.get('/health', (req, res) => {
 
 // Feature routers. Add new endpoints inside each feature's own routes file,
 // not here, so this file rarely changes (avoids merge conflicts).
+router.use('/auth', authRoutes); //   -> /api/auth/*   (Ketul)
+router.use('/users', userRoutes); // -> /api/users/*  (Ketul)
 router.use('/ngo', ngoRoutes); //     -> /api/ngo/*    (Ketul)
 router.use('/donor', donorRoutes); // -> /api/donor/*  (Jay)
 
 // Still to be mounted when built:
-// router.use('/auth', authRoutes);   // -> /api/auth/*   (Ketul)
-// router.use('/users', userRoutes);  // -> /api/users/*  (Ketul)
 // router.use('/admin', adminRoutes); // -> /api/admin/*
 
 export default router;

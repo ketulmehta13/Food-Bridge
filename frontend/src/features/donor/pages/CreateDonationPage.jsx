@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { createDonation, createDonationRaw, describeError } from '../api/donor.api.js';
 import ApiResult from '../components/ApiResult.jsx';
+import DevTokenNotice from '../components/DevTokenNotice.jsx';
 import { FOOD_TYPES, FOOD_CATEGORIES, FOOD_UNITS, SAFETY_CHECKS } from '../donor.constants.js';
 import { DONATION_LIMITS } from '../../../constants/index.js';
 import { fromLocalInput, localInputFromNow } from '../utils/datetime.js';
@@ -124,6 +125,7 @@ export default function CreateDonationPage() {
       <p className="text-sm text-gray-600">
         Pre-filled with sample values; times are relative to now. Click <b>Post donation</b> to submit.
       </p>
+      <DevTokenNotice />
 
       <form onSubmit={submit} className="mt-6 space-y-6">
         {/* Items */}

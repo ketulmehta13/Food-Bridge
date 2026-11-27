@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import { getMyDonation, describeError } from '../api/donor.api.js';
 import ApiResult from '../components/ApiResult.jsx';
+import DevTokenNotice from '../components/DevTokenNotice.jsx';
 import StatusBadge from '../../../components/shared/StatusBadge.jsx';
 import { SAFETY_CHECKS } from '../donor.constants.js';
 import { formatDateTime } from '../utils/datetime.js';
@@ -40,6 +41,7 @@ export default function DonationDetailPage() {
   return (
     <main className="mx-auto max-w-4xl px-4 py-8">
       <Link to="/donor/donations" className="text-sm text-blue-700 hover:underline">← My donations</Link>
+      <DevTokenNotice />
 
       {d && (
         <>

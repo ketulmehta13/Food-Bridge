@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { listMyDonations, describeError } from '../api/donor.api.js';
 import ApiResult from '../components/ApiResult.jsx';
+import DevTokenNotice from '../components/DevTokenNotice.jsx';
 import StatusBadge from '../../../components/shared/StatusBadge.jsx';
 import { DONATION_STATUS } from '../../../constants/index.js';
 import { formatDateTime } from '../utils/datetime.js';
@@ -51,6 +52,7 @@ export default function MyDonationsPage() {
           + Post donation
         </Link>
       </div>
+      <DevTokenNotice />
 
       <div className="mt-4 flex flex-wrap gap-3 text-sm">
         <label>Status{' '}

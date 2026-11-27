@@ -166,6 +166,60 @@ describe('transitionDonation', () => {
     await assert.rejects(transitionDonation({ donationId: d._id, from: [], to: S.CLAIMED }));
   });
 
+  it('returnDocument "before" returns the previous state (still applies the change)', async () => {
+    const d = await createDonation(donor, { status: S.CLAIMED, claimedBy: ngo._id });
+    const before = await transitionDonation({
+      donationId: d._id,
+      from: [S.CLAIMED],
+      to: S.CANCELLED,
+      returnDocument: 'before',
+    });
+    assert.equal(before.status, S.CLAIMED);
+    assert.equal(String(before.claimedBy), String(ngo._id));
+    assert.equal((await Donation.findById(d._id)).status, S.CANCELLED);
+  });
+
+  it('default return is the updated document (existing callers unchanged)', async () => {
+    const d = await createDonation(donor);
+    const after = await transitionDonation({ donationId: d._id, from: [S.AVAILABLE], to: S.CANCELLED });
+    assert.equal(after.status, S.CANCELLED);
+  });
+
+  it('unset removes fields in the same atomic update', async () => {
+    const d = await createDonation(donor, {
+      status: S.CLAIMED,
+      claimedBy: ngo._id,
+      claimedAt: new Date(),
+      pickupOtpHash: 'abc',
+      otpGeneratedAt: new Date(),
+      otpAttempts: 2,
+    });
+    await transitionDonation({
+      donationId: d._id,
+      from: [S.CLAIMED],
+      to: S.AVAILABLE,
+      extraFilter: { claimedBy: ngo._id },
+      set: { otpAttempts: 0 },
+      unset: ['claimedBy', 'claimedAt', 'pickupOtpHash', 'otpGeneratedAt'],
+    });
+    const saved = await Donation.findById(d._id).select('+pickupOtpHash').lean();
+    assert.equal(saved.status, S.AVAILABLE);
+    for (const f of ['claimedBy', 'claimedAt', 'pickupOtpHash', 'otpGeneratedAt']) {
+      assert.ok(!(f in saved), `${f} should be removed`);
+    }
+    assert.equal(saved.otpAttempts, 0);
+  });
+
+  it('unset cannot remove _id or status, or a key also being set', async () => {
+    const d = await createDonation(donor);
+    const base = { donationId: d._id, from: [S.AVAILABLE], to: S.CANCELLED };
+    for (const bad of [{ unset: ['status'] }, { unset: ['_id'] }, { unset: ['notes'], set: { notes: 'x' } }]) {
+      await assert.rejects(transitionDonation({ ...base, ...bad }), /cannot unset/);
+    }
+    await assert.rejects(transitionDonation({ ...base, returnDocument: 'middle' }), /returnDocument/);
+    assert.equal((await Donation.findById(d._id)).status, S.AVAILABLE);
+  });
+
   it('race: two NGOs claim the same donation at once, exactly one wins', async () => {
     const d = await createDonation(donor);
     const ngo2 = await createUser(USER_TYPES.NGO);

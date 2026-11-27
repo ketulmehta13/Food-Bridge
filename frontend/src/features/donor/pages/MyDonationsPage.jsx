@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import { listMyDonations, describeError } from '../api/donor.api.js';
 import ApiResult from '../components/ApiResult.jsx';
 import DevTokenNotice from '../components/DevTokenNotice.jsx';
+import RawRequestPanel from '../components/RawRequestPanel.jsx';
 import StatusBadge from '../../../components/shared/StatusBadge.jsx';
 import { DONATION_STATUS } from '../../../constants/index.js';
 import { formatDateTime } from '../utils/datetime.js';
@@ -113,6 +114,14 @@ export default function MyDonationsPage() {
       )}
 
       <ApiResult loading={loading} error={error} data={data} />
+
+      <RawRequestPanel
+        presets={[
+          { label: 'GET list', method: 'GET', path: '/donor/donations?limit=5&sort=-createdAt' },
+          { label: 'GET status[$ne]', method: 'GET', path: '/donor/donations?status[$ne]=X' },
+          { label: 'GET limit=51', method: 'GET', path: '/donor/donations?limit=51' },
+        ]}
+      />
     </main>
   );
 }

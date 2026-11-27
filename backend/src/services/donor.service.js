@@ -38,6 +38,12 @@ const LIST_FIELDS = {
 
 const timelineError = (field, message) => ({ location: 'body', field, message });
 
+// Whitelisted copies of validated nested input (never spread client objects into the DB).
+// Exported for donor.edit.service.js.
+export const toItems = (items) => items.map(({ name, quantity, unit }) => ({ name, quantity, unit }));
+export const toPickupWindow = ({ start, end }) => ({ start, end });
+export const toAddress = ({ line1, city, state, pincode }) => ({ line1, city, state, pincode });
+
 /**
  * Check every donation time rule against the server clock (CLAUDE.md section 6).
  * Pure: no DB access. Collects all violations and throws them together.
@@ -104,21 +110,16 @@ export const createDonation = async (donorId, input) => {
 
   const donation = await Donation.create({
     donor: donorId,
-    items: input.items.map(({ name, quantity, unit }) => ({ name, quantity, unit })),
+    items: toItems(input.items),
     totalServings: input.totalServings,
     estimatedWeightKg: input.estimatedWeightKg,
     foodType: input.foodType,
     category: input.category,
     preparedAt: input.preparedAt,
     bestBefore: input.bestBefore,
-    pickupWindow: { start: input.pickupWindow.start, end: input.pickupWindow.end },
+    pickupWindow: toPickupWindow(input.pickupWindow),
     location: toPoint(input.location.lat, input.location.lng),
-    address: {
-      line1: input.address.line1,
-      city: input.address.city,
-      state: input.address.state,
-      pincode: input.address.pincode,
-    },
+    address: toAddress(input.address),
     contactPhone: input.contactPhone ?? donor.phone,
     safetyChecklist: {
       preparedHygienically: input.safetyChecklist.preparedHygienically,

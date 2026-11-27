@@ -5,7 +5,12 @@ import { csrfGuard, requireJson } from '../middlewares/csrf.middleware.js';
 import { createDonationLimiter } from '../middlewares/donorLimits.middleware.js';
 import { validate } from '../middlewares/validate.middleware.js';
 import { idParam } from '../validators/common.validators.js';
-import { createDonationBody, listMyDonationsQuery } from '../validators/donor.validators.js';
+import {
+  createDonationBody,
+  listMyDonationsQuery,
+  updateDonationBody,
+  cancelDonationBody,
+} from '../validators/donor.validators.js';
 import * as donor from '../controllers/donor.controller.js';
 import { USER_TYPES } from '../constants/index.js';
 
@@ -27,5 +32,19 @@ router.post(
 );
 router.get('/donations', validate({ query: listMyDonationsQuery }), donor.listMyDonations);
 router.get('/donations/:id', validate({ params: idParam }), donor.getMyDonation);
+router.patch(
+  '/donations/:id',
+  requireVerified,
+  requireJson,
+  validate({ params: idParam, body: updateDonationBody }),
+  donor.updateDonation
+);
+router.patch(
+  '/donations/:id/cancel',
+  requireVerified,
+  requireJson,
+  validate({ params: idParam, body: cancelDonationBody }),
+  donor.cancelDonation
+);
 
 export default router;

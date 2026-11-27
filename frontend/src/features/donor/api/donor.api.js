@@ -1,0 +1,57 @@
+import api from '../../../api/axiosInstance.js';
+
+// All donor API calls go through here. Owner: Jay.
+// - Always sends X-Requested-With (the server's CSRF guard requires it on writes).
+// - In development only, adds "Authorization: Bearer <token>" from the Dev Token panel.
+
+const DEV_TOKEN_KEY = 'foodbridge.devToken';
+const IS_DEV = import.meta.env.DEV;
+
+/** Read the dev token (always null in production builds). */
+export const getDevToken = () => {
+  if (!IS_DEV) return null;
+  try {
+    return sessionStorage.getItem(DEV_TOKEN_KEY);
+  } catch {
+    return null;
+  }
+};
+
+/** Save or clear (empty value) the dev token. No-op in production builds. */
+export const setDevToken = (token) => {
+  if (!IS_DEV) return;
+  try {
+    if (token) sessionStorage.setItem(DEV_TOKEN_KEY, token.trim());
+    else sessionStorage.removeItem(DEV_TOKEN_KEY);
+  } catch {
+    // storage unavailable (private mode): the token just won't be remembered
+  }
+};
+
+const request = (config) => {
+  const headers = { 'X-Requested-With': 'XMLHttpRequest', ...config.headers };
+  const token = getDevToken();
+  const extra = {};
+  if (token) {
+    headers.Authorization = `Bearer ${token}`;
+    // A dev token cannot be refreshed: skip the shared /auth/refresh retry so the real
+    // 401 message is shown instead of the refresh error.
+    extra._retry = true;
+  }
+  return api({ ...config, ...extra, headers });
+};
+
+/** Thin wrappers. Paths are relative to /api, e.g. donorApi.get('/donor/donations'). */
+export const donorApi = {
+  get: (url, params) => request({ method: 'get', url, params }),
+  post: (url, data) => request({ method: 'post', url, data }),
+  patch: (url, data) => request({ method: 'patch', url, data }),
+  delete: (url) => request({ method: 'delete', url }),
+};
+
+/** Turn an axios error into a readable message plus the server's JSON body (if any). */
+export const describeError = (err) => ({
+  message: err.response?.data?.message || err.message || 'Request failed',
+  status: err.response?.status ?? null,
+  body: err.response?.data ?? null,
+});

@@ -51,3 +51,24 @@ export const FOOD_CATEGORIES = Object.freeze({
   BEVERAGES: 'BEVERAGES',
   OTHER: 'OTHER',
 });
+
+// Actions recorded in the claim history of a donation (written by donor and NGO flows).
+export const CLAIM_ACTIONS = Object.freeze({
+  CLAIMED: 'CLAIMED',
+  UNCLAIMED: 'UNCLAIMED',
+  NO_SHOW: 'NO_SHOW',
+  PICKED_UP: 'PICKED_UP',
+  DISTRIBUTED: 'DISTRIBUTED',
+  CANCELLED_BY_DONOR: 'CANCELLED_BY_DONOR',
+});
+
+// Business limits for donations. The server enforces all of these.
+export const DONATION_LIMITS = Object.freeze({
+  MAX_PHOTOS: 3,
+  MAX_OTP_ATTEMPTS: 5,
+  MAX_SHELF_LIFE_HOURS: 48,
+  MIN_MINUTES_BEFORE_EXPIRY: 30,
+  MAX_ITEMS: 20,
+  PAGE_SIZE_DEFAULT: 10,
+  PAGE_SIZE_MAX: 50,
+});

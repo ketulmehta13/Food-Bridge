@@ -129,6 +129,8 @@ export default function NgoProfile() {
       setError(Object.keys(fields).length ? 'Please fix the highlighted fields.' : getErrorMessage(err));
     } finally {
       setSaving(false);
+      // The result message is at the top of the form, so scroll up to show it.
+      window.scrollTo({ top: 0, behavior: 'smooth' });
     }
   };
 
